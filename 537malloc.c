@@ -12,7 +12,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stderr.h>
 #include "537malloc.h"
+
+tree *tree = createTree();
 
 void *malloc537(size_t size) {
 	if ( size == 0 ) {
@@ -20,15 +23,15 @@ void *malloc537(size_t size) {
 	} 
 	void *ptr = malloc(size);
 	Node *node;
-	Node **nodes = malloc(sizeof(*Node) * BUFFER);
+	Node **nodes = malloc(sizeof(Node*) * BUFFER);
 	int start_addr = &(ptr);
 	int end_addr = start_addr + size;
-	getOverlapNodes(Tree->root, nodes, 0, start_addr, end_addr);
+	getOverlapNodes(tree->root, nodes, 0, start_addr, end_addr);
 	void *end_ptr = *(ptr + (void*)size);
 
 	if ( nodes[0] == NULL ) {
 		node = createNode(ptr, size);
-		add(Tree->root, node);
+		add(tree->root, node);
 	} else {
 		int i = 0;
 		int head = -1;
@@ -54,13 +57,13 @@ void *malloc537(size_t size) {
 				// make new node at ptr with size
 				node = createNode(ptr, size);
 				node->freed = false;
-				add(Tree->root, node);
+				add(tree->root, node);
 			}
 		} else {
 			// head does not overlap with any existing node
 			node = createNode(ptr, size);
 			node->freed = false;
-			add(Tree->root, node);
+			add(tree->root, node);
 		}
 		if ( tail >= 0 ) {
 			node_start_addr = &node[tail]->ptr;
@@ -72,7 +75,7 @@ void *malloc537(size_t size) {
 				// make new node for extra
 				node_size = node_end_addr - &end_ptr;
 				node = createNode(end_ptr, node_size);
-				add(Tree->root, node);
+				add(tree->root, node);
 				tail = -1
 			}
 		}
@@ -80,7 +83,7 @@ void *malloc537(size_t size) {
 		i = 0;
 		while ( nodes[i] != NULL ) {
 			if ( i != head ) {
-				removeNode(Tree->root, nodes[i]);
+				removeNode(tree->root, nodes[i]);
 			}
 		}
 	}
@@ -95,7 +98,7 @@ bool addressInNode(int start_addr, int end_addr, void *ptr) {
 }
 
 void free537(void *ptr) {
-	Node *node = rangeSearch(Tree->root, ptr);
+	Node *node = rangeSearch(tree->root, ptr);
 	if ( node == NULL ) {
 		fprintf(stderr, "ERROR: Freeing memory that has not been allocated with malloc537().");
 		exit(-1);
@@ -124,7 +127,7 @@ void *realloc537(void *ptr, size_t size) {
 
 void memcheck537(void *ptr, size_t size) {
 	void *end_ptr = *(ptr + (void*)size);
-	Node *node = rangeSearch(Tree->root, ptr);
+	Node *node = rangeSearch(tree->root, ptr);
 	if ( node == NULL ) {
 		fprintf(stderr, "ERROR: Accessing bad memory: Memory has not been allocated by malloc537().");
 		exit(-1);
