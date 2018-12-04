@@ -24,7 +24,6 @@
  * Delete: deleteRebalance
  */
 #include "rbtree.h"
-#include "node.h"
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -9,8 +9,7 @@
 // CS Login:         natalie
 //
 ////////////////////////////////////////////////////////////////////////////////
-#include <stddef.h>
-#include <stdbool.h>
+
 #include "rbtree.h"
 #include "node.h"
 
