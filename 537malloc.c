@@ -9,7 +9,9 @@
 // CS Login:         natalie
 //
 ////////////////////////////////////////////////////////////////////////////////
-
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include "537malloc.h"
 
 void *malloc537(size_t size) {
@@ -116,7 +118,7 @@ void *realloc537(void *ptr, size_t size) {
 	} else {
 		void *new_ptr = realloc(ptr, size);
 		free537(ptr);
-		malloc537(new_ptr, size);
+		malloc537(size);
 	}
 }
 
