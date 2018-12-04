@@ -12,7 +12,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stderr.h>
 #include "537malloc.h"
 
 tree *tree = createTree();
