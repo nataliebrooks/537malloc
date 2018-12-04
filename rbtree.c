@@ -286,10 +286,6 @@ void removeNode(Tree *tree, Node *node) {
 	free(node);
 }
 
-Node *search(Tree *tree, void *ptr) {
-	
-}
-
 /*
  * Searches the tree and returns an array of nodes who are included
  * in the range provided.
@@ -357,7 +353,7 @@ bool *inRange(Node *node, int start_addr, int end_addr) {
  * the address pointed to by ptr. Returns NULL if there are
  * none.
  */
-Node *rangeSearch(void *ptr) {
+Node *rangeSearch(Node *node, void *ptr) {
     int start_addr = &(node->ptr);
     int end_addr = start_addr + node->size;
     

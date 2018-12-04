@@ -19,12 +19,12 @@ void *malloc537(size_t size) {
 	Node **nodes = malloc(sizeof(*Node) * BUFFER);
 	int start_addr = &(ptr);
 	int end_addr = start_addr + size;
-	getNodes(root, nodes, 0, start_addr, end_addr);
+	getOverlapNodes(tree->root, nodes, 0, start_addr, end_addr);
 	void *end_ptr = *(ptr + (void*)size);
 
 	if ( nodes[0] == NULL ) {
 		node = createNode(ptr, size);
-		add(node);
+		add(tree->root, node);
 	} else {
 		int i = 0;
 		int head = -1;
@@ -50,13 +50,13 @@ void *malloc537(size_t size) {
 				// make new node at ptr with size
 				node = createNode(ptr, size);
 				node->freed = false;
-				add(node);
+				add(tree->root, node);
 			}
 		} else {
 			// head does not overlap with any existing node
 			node = createNode(ptr, size);
 			node->freed = false;
-			add(node);
+			add(tree->root, node);
 		}
 		if ( tail >= 0 ) {
 			node_start_addr = &node[tail]->ptr;
@@ -68,7 +68,7 @@ void *malloc537(size_t size) {
 				// make new node for extra
 				node_size = node_end_addr - &end_ptr;
 				node = createNode(end_ptr, node_size);
-				add(node);
+				add(tree->root, node);
 				tail = -1
 			}
 		}
@@ -76,7 +76,7 @@ void *malloc537(size_t size) {
 		i = 0;
 		while ( nodes[i] != NULL ) {
 			if ( i != head ) {
-				remove(nodes[i]);
+				removeNode(tree->root, nodes[i]);
 			}
 		}
 	}
@@ -91,7 +91,7 @@ bool addressInNode(int start_addr, int end_addr, void *ptr) {
 }
 
 void free537(void *ptr) {
-	Node *node = rangeSearch(ptr);
+	Node *node = rangeSearch(tree->root, ptr);
 	if ( node == NULL ) {
 		fprintf(stderr, "ERROR: Freeing memory that has not been allocated with malloc537().");
 		exit(-1);
@@ -113,13 +113,8 @@ void *realloc537(void *ptr, size_t size) {
 		free537(ptr);
 	} else {
 		void *new_ptr = realloc(ptr, size);
-		if ( new_ptr = ptr ) {
-			free(ptr);
-			malloc(new_ptr, size);
-		} else {
-			free(ptr);
-			malloc(new_ptr, size);			
-		}
+		free537(ptr);
+		malloc537(new_ptr, size);
 	}
 }
 
