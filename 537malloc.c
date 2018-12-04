@@ -112,10 +112,26 @@ void *realloc537(void *ptr, size_t size) {
 	} else if ( size == 0 ) {
 		free537(ptr);
 	} else {
-		void *new_ptr = realloc(ptr);
-		free(ptr);
-		malloc(ptr, size);
+		void *new_ptr = realloc(ptr, size);
+		if ( new_ptr = ptr ) {
+			free(ptr);
+			malloc(new_ptr, size);
+		} else {
+			free(ptr);
+			malloc(new_ptr, size);			
+		}
 	}
+}
+
+void memcheck537(void *ptr, size_t size) {
+	Node *node;
+	Node **nodes = malloc(sizeof(*Node) * BUFFER);
+	int start_addr = &(ptr);
+	int end_addr = start_addr + size;
+	getNodes(root, nodes, 0, start_addr, end_addr);
+	void *end_ptr = *(ptr + (void*)size);
+
+	while (  )
 }
 
 
