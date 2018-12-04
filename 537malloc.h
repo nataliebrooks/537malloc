@@ -9,8 +9,13 @@
 // CS Login:         natalie
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include <stddef.h>
+#include <bool.h>
+#include "rbtree.h"
+#include "node.h"
 
 const int BUFFER = 1024;
+
 
 /*
  * In addition to actually allocating the memory by calling
