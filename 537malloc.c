@@ -119,14 +119,28 @@ void *realloc537(void *ptr, size_t size) {
 }
 
 void memcheck537(void *ptr, size_t size) {
-	Node *node;
-	Node **nodes = malloc(sizeof(*Node) * BUFFER);
-	int start_addr = &(ptr);
-	int end_addr = start_addr + size;
-	getNodes(root, nodes, 0, start_addr, end_addr);
 	void *end_ptr = *(ptr + (void*)size);
-
-	while (  )
+	Node *node = rangeSearch(tree->root, ptr);
+	if ( node == NULL ) {
+		fprintf(stderr, "ERROR: Accessing bad memory: Memory has not been allocated by malloc537().");
+		exit(-1);
+	}
+	if ( node->ptr == ptr ) {
+		if ( node->freed == false ) {
+			if ( node->size >= size ) {
+				return;
+			} else {
+				fprintf(stderr, "ERROR: Accessing bad memory: Memory extends beyond a single block allocated by malloc537().");
+				exit(-1);
+			}
+		} else {
+			fprintf(stderr, "ERROR: Accessing bad memory: Memory has been freed by free537().");
+			exit(-1);
+		}
+	} else {
+		fprintf(stderr, "ERROR: Accessing bad memory: Memory that does not begin at an address allocated by malloc537().");
+		exit(-1);
+	}
 }
 
 
