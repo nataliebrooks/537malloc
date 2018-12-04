@@ -28,12 +28,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/*
- * Replaces the old_node with the new_node in the tree.
- */
-void replace(Node *root, Node *old_node, Node *new_node) {
+Tree* createTree() {
+	Tree *tree = malloc(sizeof(Tree));
+	tree->root = NULL;
+	return tree;
+}
+
+void add_case1(Tree *tree, Node *node);
+void deleteCase1(Tree *tree, Node *node);
+
+void replace(Tree *tree, Node *old_node, Node *new_node) {
     if (old_node->parent == NULL) {
-        root = new_node;
+        tree->root = new_node;
     } else {
         if (old_node == old_node->parent->left)
             old_node->parent->left = new_node;
@@ -45,12 +51,9 @@ void replace(Node *root, Node *old_node, Node *new_node) {
     }
 }
 
-/*
- * Performs a left rotation.
- */
-void rotate_left(Node *root, Node *node) {
+void rotate_left(Tree *tree, Node *node) {
     Node *right_child = node->right;
-    replace(root, node, right_child);
+    replace(tree, node, right_child);
     node->right = right_child->left;
     if (right_child->left != NULL) {
         right_child->left->parent = node;
@@ -59,12 +62,9 @@ void rotate_left(Node *root, Node *node) {
     node->parent = right_child;
 }
 
-/*
- * Performs a right rotation.
- */
-void rotate_right(Node *root, Node *node) {
+void rotate_right(Tree *tree, Node *node) {
     Node *left_child = node->left;
-    replace(root, node, left_child);
+    replace(tree, node, left_child);
     node->left = left_child->right;
     if (left_child->right != NULL) {
         left_child->right->parent = node;
@@ -77,13 +77,13 @@ void rotate_right(Node *root, Node *node) {
  * Continuation of case 4.  Changes the color of the parent and grandparent and
  * rotates if needed.
  */
-void add_case5(Node *root, Node *node) {
+void add_case5(Tree *tree, Node *node) {
     node->parent->color = BLACK;
     grandparent(node)->color = RED;
     if (node == node->parent->left && node->parent == grandparent(node)->left) {
-        rotate_right(root, grandparent(node));
+        rotate_right(tree, grandparent(node));
     } else if (node == node->parent->right && node->parent == grandparent(node)->right) {
-        rotate_left(root, grandparent(node));
+        rotate_left(tree, grandparent(node));
     } else {
         fprintf(stderr, "Error building tree.");
         exit(0);
@@ -93,61 +93,61 @@ void add_case5(Node *root, Node *node) {
 /*
  * Balances the tree in the case where rotation is neccessary.
  */
-void add_case4(Node *root, Node *node) {
+void add_case4(Tree *tree, Node *node) {
     if (node == node->parent->right && node->parent == grandparent(node)->left) {
-        rotate_left(root, node->parent);
+        rotate_left(tree, node->parent);
         node = node->left;
     } else if (node == node->parent->left && node->parent == grandparent(node)->right) {
-        rotate_right(root, node->parent);
+        rotate_right(tree, node->parent);
         node = node->right;
     }
-    add_case5(root, node);
+    add_case5(tree, node);
 }
 
 /*
  * Balances the tree by chancing the color of the parent's generation and
  * onwards.
  */
-void add_case3(Node *root, Node *node) {
+void add_case3(Tree *tree, Node *node) {
     if(color(uncle(node)) == RED) {
         node->parent->color = BLACK;
         uncle(node)->color = BLACK;
         grandparent(node)->color = RED;
-        add_case1(root, grandparent(node));
+        add_case1(tree, grandparent(node));
     } else {
-        add_case4(root, node);
+        add_case4(tree, node);
     }
 }
 
 /*
  * If the parent's color is black we're done.
  */
-void add_case2(Node *root, Node *node) {
+void add_case2(Tree *tree, Node *node) {
     if (color(node->parent) == BLACK)
         return;
     else
-        add_case3(root, node);
+        add_case3(tree, node);
 }
 
 /*
  * If the node is the root, set color to black.
  */
-void add_case1(Node *root, Node *node) {
+void add_case1(Tree *tree, Node *node) {
     if (node->parent == NULL)
         node->color = BLACK;
     else
-        add_case2(root, node);
+        add_case2(tree, node);
 }
 
 /*
  * Inserts a node into the tree.
  */
-void add(Node *root, Node *new_node) {
-	if(root == NULL) {
-		root = new_node;
+void add(Tree *tree, Node *new_node) {	
+	if(tree->root == NULL) {
+		tree->root = new_node;
 	}
 	else {
-		Node *node = root;
+		Node *node = tree->root;
 		while(1) {
 			int temp = compare(new_node, node);
 			if (temp == 0) {
@@ -170,13 +170,13 @@ void add(Node *root, Node *new_node) {
 		}
 		new_node->parent = node;
 	}
-	add_case1(root, new_node);
+	add_case1(tree, new_node);
 }
 
 /*
  * case 4 for how to rebalance the tree
  */
-void delete_case4(Node *root, Node *node) {
+void deleteCase4(Tree *tree, Node *node) {
     if ( (node == node->parent->left) &&
         (color(sibling(node)) == BLACK) &&
         (color(sibling(node)->left) == RED) &&
@@ -184,7 +184,7 @@ void delete_case4(Node *root, Node *node) {
         
         sibling(node)->color = RED;
         sibling(node)->left->color = BLACK;
-        rotate_right(root, sibling(node));
+        rotate_right(tree, sibling(node));
         
     } else if ( (node == node->parent->right) &&
                (color(sibling(node)) == BLACK) &&
@@ -193,23 +193,23 @@ void delete_case4(Node *root, Node *node) {
         
         sibling(node)->color = RED;
         sibling(node)->right->color = BLACK;
-        rotate_left(root, sibling(node));
+        rotate_left(tree, sibling(node));
     }
     sibling(node)->color = color(node->parent);
     node->parent->color = BLACK;
     if ( node == node->parent->left ) {
         sibling(node)->right->color = BLACK;
-        rotate_left(root, node->parent);
+        rotate_left(tree, node->parent);
     } else {
         sibling(node)->left->color = BLACK;
-        rotate_right(root, node->parent);
+        rotate_right(tree, node->parent);
     }
 }
 
 /*
  * case 3 for how to rebalance the tree
  */
-void deleteCase3(Node *root, Node *node) {
+void deleteCase3(Tree *tree, Node *node) {
     if ( (color(node->parent) == RED) &&
         (color(sibling(node)) == BLACK) &&
         (color(sibling(node)->left) == BLACK) &&
@@ -218,30 +218,30 @@ void deleteCase3(Node *root, Node *node) {
         sibling(node)->color = RED;
         node->parent->color = BLACK;
     } else {
-        delete_case4(root, node);
+        deleteCase4(tree, node);
     }
 }
 
 /*
  * case 2 for how to rebalance the tree
  */
-void deleteCase2(Node *root, Node *node) {
+void deleteCase2(Tree *tree, Node *node) {
     if ( (color(node->parent) == BLACK) &&
         (color(sibling(node)) == BLACK) &&
         (color(sibling(node)->left) == BLACK) &&
         (color(sibling(node)->right) == BLACK) ) {
         
         sibling(node)->color = RED;
-        deleteCase1(root, node->parent);
+        deleteCase1(tree, node->parent);
     } else {
-        deleteCase3(root, node);
+        deleteCase3(tree, node);
     }
 }
 
 /*
  * case 1 for how to rebalance the tree
  */
-void deleteCase1(Node *root, Node *node) {
+void deleteCase1(Tree *tree, Node *node) {
     if ( node->parent == NULL ) {
         return;
     } else {
@@ -249,19 +249,19 @@ void deleteCase1(Node *root, Node *node) {
             node->parent->color = RED;
             sibling(node)->color = BLACK;
             if ( node == node->parent->left ) {
-                rotate_left(root, node->parent);
+                rotate_left(tree, node->parent);
             } else {
-                rotate_right(root, node->parent);
+                rotate_right(tree, node->parent);
             }
         }
-        deleteCase2(root, node);
+        deleteCase2(tree, node);
     }
 }
 
 /*
  * Removes a node from the tree.
  */
-void removeNode(Node *root, Node *node) {
+void removeNode(Tree *tree, Node *node) {
 	Node *child;
 	if ( node == LEAF ) {
 		// node has already been deleted
@@ -277,33 +277,31 @@ void removeNode(Node *root, Node *node) {
 	child = (node->right == LEAF) ? node->left : node->right;
 	if ( color(node) == BLACK ) {
 		node->color = color(child);
-		deleteCase1(root, node);
+		deleteCase1(tree, node);
 	}
-	replace(root, node, child);
+	replace(tree, node, child);
 	if ( node->parent == NULL && child != LEAF ) {
 		child->color = BLACK;
 	}
 	free(node);
 }
 
-
-
-Node *search(Node *root, void *ptr) {
+Node *search(Tree *tree, void *ptr) {
 	
 }
 
 /*
- * Searches the tree and returns an array of nodes who are included 
+ * Searches the tree and returns an array of nodes who are included
  * in the range provided.
  */
 void getOverlapNodes(Node *node, Node **nodes, int k, int start_addr, int end_addr) {
     if ( node == NULL ) {
         return;
     }
-
+    
     int start_addr = &(node->ptr);
     int end_addr = start_addr + node->size;
-
+    
     if ( inRange(node, start_addr, end_addr) ) {
         nodes[k] = node;
         return getOverlapNodes(node->right, nodes, k + 1, start_addr, end_addr);
@@ -314,7 +312,7 @@ void getOverlapNodes(Node *node, Node **nodes, int k, int start_addr, int end_ad
         } else {
             return getOverlapNodes(node->right, nodes, k, start_addr, end_addr)
         }
-    }   
+    }
 }
 
 /*
@@ -342,10 +340,10 @@ bool *inRange(Node *node, int start_addr, int end_addr) {
         // node starts within bounds
         if ( node_start >= start_addr && node_start <= end_addr ) {
             return true;
-        // node ends within bounds
+            // node ends within bounds
         } else if ( node_end >= start_addr && node_end <= end_addr ) {
             return true;
-        // range is contained within the node
+            // range is contained within the node
         } else if ( node_start <= start_addr && node_end >= end_addr ) {
             return true;
         } else {
@@ -355,14 +353,14 @@ bool *inRange(Node *node, int start_addr, int end_addr) {
 }
 
 /*
- * Searches the tree and returns a node whose range includes 
+ * Searches the tree and returns a node whose range includes
  * the address pointed to by ptr. Returns NULL if there are
  * none.
  */
 Node *rangeSearch(void *ptr) {
     int start_addr = &(node->ptr);
     int end_addr = start_addr + node->size;
-
+    
     if ( node == NULL ) {
         return NULL;
     } else {
@@ -375,3 +373,4 @@ Node *rangeSearch(void *ptr) {
         }
     }
 }
+
