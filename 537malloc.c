@@ -112,7 +112,9 @@ void *realloc537(void *ptr, size_t size) {
 	} else if ( size == 0 ) {
 		free537(ptr);
 	} else {
-		
+		void *new_ptr = realloc(ptr);
+		free(ptr);
+		malloc(ptr, size);
 	}
 }
 
